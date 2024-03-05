@@ -5,13 +5,14 @@ import { CreateUserDto } from './index.js';
 import { inject, injectable } from 'inversify';
 import { Component } from '../../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
 
 @injectable()
 export class DefaultUserService implements UserService {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.UserModel) private readonly userModel: types.ModelType<UserEntity>
-  ) {}
+  ) { }
 
   public async create(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
     const user = new UserEntity(dto);
@@ -24,7 +25,7 @@ export class DefaultUserService implements UserService {
   }
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel.findOne({email});
+    return this.userModel.findOne({ email });
   }
 
   public async findById(userId: string): Promise<DocumentType<UserEntity> | null> {
@@ -39,5 +40,11 @@ export class DefaultUserService implements UserService {
     }
 
     return this.create(dto, salt);
+  }
+
+  public async updateById(userId: string, dto: UpdateUserDto): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel
+      .findByIdAndUpdate(userId, dto, { new: true })
+      .exec();
   }
 }
